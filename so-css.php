@@ -2,7 +2,7 @@
 /*
 Plugin Name: SiteOrigin CSS
 Description: An advanced CSS editor from SiteOrigin.
-Version: 1.0
+Version: 1.0.1
 Author: SiteOrigin
 Author URI: https://siteorigin.com
 Plugin URI: https://siteorigin.com/css/
@@ -10,8 +10,11 @@ License: GPL3
 License URI: https://www.gnu.org/licenses/gpl-3.0.txt
 */
 
-define('SOCSS_VERSION', '1.0');
-define('SOCSS_JS_SUFFIX', '.min');
+// Handle the legacy CSS editor that came with SiteOrigin themes
+include plugin_dir_path(__FILE__) . '/inc/legacy.php';
+
+define('SOCSS_VERSION', '1.0.1');
+define('SOCSS_JS_SUFFIX', '');
 
 /**
  * Class SiteOrigin_CSS The main class for the SiteOrigin CSS Editor
@@ -25,11 +28,12 @@ class SiteOrigin_CSS {
 		$this->snippet_paths = array();
 
 		// Main header actions
-		add_action( 'wp_head', array($this, 'action_wp_head') );
+		add_action( 'wp_head', array($this, 'action_wp_head'), 20 );
 
 		// All the admin actions
 		add_action( 'admin_menu', array($this, 'action_admin_menu') );
 		add_action( 'admin_enqueue_scripts', array($this, 'enqueue_admin_scripts') );
+		add_action( 'admin_enqueue_scripts', array($this, 'dequeue_admin_scripts'), 100 );
 		add_action( 'load-appearance_page_so_custom_css', array($this, 'add_help_tab') );
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
 
@@ -183,6 +187,18 @@ class SiteOrigin_CSS {
 
 		// This is for the templates required by the CSS editor
 		add_action( 'admin_footer', array($this, 'action_admin_footer') );
+	}
+
+	/**
+	 * @param $page
+	 */
+	function dequeue_admin_scripts( $page ) {
+		if( $page != 'appearance_page_so_custom_css' ) return;
+
+		// Dequeue the core WordPress color picker on the custom CSS page.
+		// This script causes conflicts and other plugins seem to be enqueueing it on the SO CSS admin page.
+		wp_dequeue_script('wp-color-picker');
+		wp_dequeue_style('wp-color-picker');
 	}
 
 	/**
@@ -390,7 +406,7 @@ class SiteOrigin_CSS {
 	 * Get a URL to tweet out the changes
 	 */
 	function get_tweet_url(){
-		$tweet = __('I customized my site using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
+		$tweet = __('I changed my site design using @SiteOrigin CSS (http://siteorigin.com/css/). What do you think?', 'so-css');
 		$tweet .= ' ';
 		$tweet .= get_site_url();
 
