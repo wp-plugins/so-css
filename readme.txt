@@ -2,7 +2,7 @@
 Tags: css, design, edit, customize
 Requires at least: 3.9
 Tested up to: 4.2.2
-Stable tag: 1.0.1
+Stable tag: 1.0.2
 License: GPLv3 or later
 Contributors: gpriday
 
